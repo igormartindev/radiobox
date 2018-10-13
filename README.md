@@ -1,2 +1,2 @@
-# radiobox
+# RadioBox
 WiFi Radio
