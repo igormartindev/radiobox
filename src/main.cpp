@@ -9,11 +9,11 @@ void setup()
     NetworkManager::instance()
         ->connect("RadioBox", "secret");
 
-    AudioPlayer::instance()
-        ->init();
+    PlayList* playlist = new PlayList(&SPIFFS, "/playlist");
 
     AudioPlayer::instance()
-        ->play("http://radio.test/mp3");
+        ->init(playlist)
+        ->play();
 }
 
 void loop()
