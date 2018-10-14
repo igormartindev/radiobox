@@ -8,9 +8,16 @@ void setup()
 
     NetworkManager::instance()
         ->connect("RadioBox", "secret");
+
+    AudioPlayer::instance()
+        ->init();
+
+    AudioPlayer::instance()
+        ->play("http://radio.test/mp3");
 }
 
 void loop()
 {
-    // Main loop
+    AudioPlayer::instance()
+        ->handle();
 }
