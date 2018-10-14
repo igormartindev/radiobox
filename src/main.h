@@ -3,8 +3,8 @@
 
 #include <Arduino.h>
 #include <SD.h>
-#include "ESP8266WebServer.h"
-#include "DNSServer.h"
-#include "ESP8266HTTPClient.h"
+#include <ESP8266HTTPClient.h>
 
-#endif
+#include "Services/NetworkManager.h"
+
+#endif // MAIN_H
