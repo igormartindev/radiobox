@@ -20,6 +20,7 @@ public:
     void play();
     void stop();
     void handle();
+    PlayList* getPlaylist();
 
 private:
     AudioGeneratorMP3* mp3Player;

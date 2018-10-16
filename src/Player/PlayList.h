@@ -8,6 +8,7 @@
 
 typedef std::list<std::string> TrackList;
 
+
 class PlayList
 {
 public:
@@ -18,6 +19,7 @@ public:
     void removeTrack(uint8_t trackNo);
     bool hasTracks(void);
     uint8_t getTracksCount(void);
+    uint8_t getCurrentTrackPos();
 
 private:
     static const uint8_t TRACKS_MAX = 25;

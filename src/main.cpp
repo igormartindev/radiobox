@@ -1,5 +1,10 @@
-#include "main.h"
+#include <Arduino.h>
+#include "Services/NetworkManager.h"
+#include "Player/AudioPlayer.h"
+#include "Server/RadioServer.h"
 
+
+RadioServer* webServer;
 
 void setup()
 {
@@ -14,10 +19,15 @@ void setup()
     AudioPlayer::instance()
         ->init(playlist)
         ->play();
+
+    webServer = new RadioServer();
+    webServer->start();
 }
 
 void loop()
 {
     AudioPlayer::instance()
         ->handle();
+
+    webServer->handler();
 }

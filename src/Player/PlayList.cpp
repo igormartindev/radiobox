@@ -33,6 +33,8 @@ std::string PlayList::getCurrentTrack()
     return getTrack(currentTrack);
 }
 
+
+
 void PlayList::addTrack(std::string url)
 {
     if (!url.length()) {
@@ -61,6 +63,11 @@ void PlayList::removeTrack(uint8_t trackNo)
 uint8_t PlayList::getTracksCount(void)
 {
     return tracklist->size();
+}
+
+uint8_t PlayList::getCurrentTrackPos()
+{
+    return currentTrack;
 }
 
 bool PlayList::hasTracks(void)

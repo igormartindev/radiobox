@@ -61,3 +61,8 @@ void AudioPlayer::stop()
         mp3Player->stop();
     }
 }
+
+PlayList* AudioPlayer::getPlaylist()
+{
+    return playlist;
+}
