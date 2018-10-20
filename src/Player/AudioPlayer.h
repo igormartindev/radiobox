@@ -13,23 +13,25 @@
 class AudioPlayer
 {
 public:
-    static AudioPlayer* instance();
-
-    AudioPlayer* init(PlayList* playlist);
+    explicit AudioPlayer(PlayList* playlist);
     void play(const char* uri);
     void play();
+    void play(uint8_t trackNo);
     void stop();
     void handle();
     PlayList* getPlaylist();
 
 private:
+    static const uint16_t BUFFER_SIZE = 2000;
+
     AudioGeneratorMP3* mp3Player;
     AudioFileSourceICYStream* source;
     AudioFileSourceBuffer* buffer;
     AudioOutputI2SNoDAC* output;
-    PlayList *playlist;
+    PlayList* playlist;
 
-    AudioPlayer() {};
+    AudioPlayer(AudioPlayer const&) = delete;
+    AudioPlayer& operator= (AudioPlayer const&) = delete;
 };
 
 #endif // AUDIO_PLAYER_H

@@ -7,15 +7,21 @@
 
 class RadioServer
 {
-    private:
-        ESP8266WebServer *server;
-        HomeController *controller;
-        ESP8266WebServer::THandlerFunction rootHandler;
+public:
+    RadioServer(AudioPlayer* player, uint8_t port = 80);
+    void start();
+    void handler(void);
 
-    public:
-        void start(int port = 80);
-        void router(void);
-        void handler(void);
+private:
+    ESP8266WebServer* server;
+    AudioPlayer* player;
+    HomeController* controller;
+    ESP8266WebServer::THandlerFunction rootHandler;
+
+    void router(void);
+
+    RadioServer(RadioServer const&) = delete;
+    RadioServer& operator= (RadioServer const&) = delete;
 };
 
 #endif // RADIO_SERVER_H

@@ -7,14 +7,19 @@
 
 class HomeController
 {
-    private:
-        ESP8266WebServer *server;
+public:
+    HomeController(ESP8266WebServer* server, AudioPlayer* player);
+    void index(void);
+    void addStation(void);
+    void delStation(void);
+    void playStation(void);
 
-    public:
-        HomeController(ESP8266WebServer *server);
-        void index(void);
-        void addStation(void);
-        void delStation(void);
+private:
+    ESP8266WebServer* server;
+    AudioPlayer* player;
+
+    HomeController(HomeController const&);
+    HomeController& operator= (HomeController const&);
 };
 
 #endif // HOME_CONTROLLER_H

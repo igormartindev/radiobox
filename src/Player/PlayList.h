@@ -20,6 +20,7 @@ public:
     bool hasTracks(void);
     uint8_t getTracksCount(void);
     uint8_t getCurrentTrackPos();
+    bool setCurrentTrackPos(uint8_t trackNo);
 
 private:
     static const uint8_t TRACKS_MAX = 25;
@@ -28,6 +29,9 @@ private:
     const char* filePath;
     TrackList* tracklist;
     uint8_t currentTrack = 0;
+
+    PlayList(PlayList const&) = delete;
+    PlayList& operator= (PlayList const&) = delete;
 
     void load(void);
     void save(void);

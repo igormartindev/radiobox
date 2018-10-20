@@ -5,6 +5,7 @@
 
 
 RadioServer* webServer;
+AudioPlayer* player;
 
 void setup()
 {
@@ -15,19 +16,15 @@ void setup()
         ->connect("RadioBox", "secret");
 
     PlayList* playlist = new PlayList(&SPIFFS, "/playlist");
+    player = new AudioPlayer(playlist);
+    webServer = new RadioServer(player);
 
-    AudioPlayer::instance()
-        ->init(playlist)
-        ->play();
-
-    webServer = new RadioServer();
     webServer->start();
+    player->play();
 }
 
 void loop()
 {
-    AudioPlayer::instance()
-        ->handle();
-
     webServer->handler();
+    player->handle();
 }

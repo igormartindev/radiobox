@@ -1,21 +1,21 @@
 #include "HomeController.h"
 
 
-HomeController::HomeController(ESP8266WebServer *server)
+HomeController::HomeController(ESP8266WebServer* server, AudioPlayer* player)
 {
     this->server = server;
+    this->player = player;
 }
 
 void HomeController::index(void)
 {
-    AudioPlayer *player = AudioPlayer::instance();
     PlayList *playlist = player->getPlaylist();
 
     String body;
     String trackList;
 
     for (uint8_t i = 0; i < playlist->getTracksCount(); i++) {
-        trackList += (i+1 == playlist->getCurrentTrackPos()) ? "<tr class='active' style='font-weight:bold'>" : "<tr>";
+        trackList += (i == playlist->getCurrentTrackPos()) ? "<tr class='active' style='font-weight:bold'>" : "<tr>";
         trackList +=
             "<td>";
         trackList += i + 1;
@@ -30,6 +30,13 @@ void HomeController::index(void)
         trackList +=
                     "'>"
                     "<button type='submit' class='close'><span>&times;</span></button>"
+                "</form>"
+                "<form method='GET' action='/play' style='display:inline'>"
+                    "<input type='hidden' name='id' value='";
+        trackList += i;
+        trackList +=
+                    "'>"
+                    "<button type='submit' class='close'><i class='material-icons'>play_arrow</i></span></button>"
                 "</form>";
         trackList +=
             "</td>"
@@ -70,7 +77,6 @@ void HomeController::index(void)
 void HomeController::addStation(void)
 {
     String url = server->arg("url");
-    AudioPlayer *player = AudioPlayer::instance();
     PlayList *playlist = player->getPlaylist();
 
     playlist->addTrack(url.c_str());
@@ -82,10 +88,19 @@ void HomeController::addStation(void)
 void HomeController::delStation(void)
 {
     String stationId = server->arg("id");
-    AudioPlayer *player = AudioPlayer::instance();
     PlayList *playlist = player->getPlaylist();
 
     playlist->removeTrack(stationId.toInt());
+
+    server->sendHeader("Location", "/", true);
+    server->send(302, "text/plain", "");
+}
+
+void HomeController::playStation(void)
+{
+    String stationId = server->arg("id");
+
+    player->play(stationId.toInt());
 
     server->sendHeader("Location", "/", true);
     server->send(302, "text/plain", "");
