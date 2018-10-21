@@ -34,16 +34,7 @@ void AudioPlayer::play(const char* uri)
 void AudioPlayer::play()
 {
     stop();
-
-    if (!playlist->hasTracks()) {
-        Serial.println("Playlist is empty");
-        return;
-    }
-
-    source->open(playlist->getCurrentTrack().c_str());
-
-    Serial.println("Start playing...");
-    mp3Player->begin(buffer, output);
+    play(playlist->getCurrentTrackPos());
 }
 
 void AudioPlayer::play(uint8_t trackNo)
@@ -60,7 +51,13 @@ void AudioPlayer::play(uint8_t trackNo)
         return;
     }
 
-    source->open(playlist->getTrack(trackNo).c_str());
+    delete output;
+    delete buffer;
+    delete source;
+
+    source = new AudioFileSourceICYStream(playlist->getCurrentTrack().c_str());
+    buffer = new AudioFileSourceBuffer(source, BUFFER_SIZE);
+    output = new AudioOutputI2SNoDAC();
 
     Serial.println("Start playing...");
     mp3Player->begin(buffer, output);
@@ -69,6 +66,8 @@ void AudioPlayer::play(uint8_t trackNo)
 void AudioPlayer::stop()
 {
     if (mp3Player->isRunning()) {
+        output->SetGain(0);
+        Serial.println("Stop player.");
         mp3Player->stop();
     }
 }

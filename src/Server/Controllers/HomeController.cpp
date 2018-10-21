@@ -9,69 +9,133 @@ HomeController::HomeController(ESP8266WebServer* server, AudioPlayer* player)
 
 void HomeController::index(void)
 {
-    PlayList *playlist = player->getPlaylist();
-
-    String body;
-    String trackList;
-
-    for (uint8_t i = 0; i < playlist->getTracksCount(); i++) {
-        trackList += (i == playlist->getCurrentTrackPos()) ? "<tr class='active' style='font-weight:bold'>" : "<tr>";
-        trackList +=
-            "<td>";
-        trackList += i + 1;
-        trackList +=
-            "</td>"
-            "<td>";
-        trackList += playlist->getTrack(i).c_str();
-        trackList += " "
-                "<form method='GET' action='/del' style='display:inline'>"
-                    "<input type='hidden' name='id' value='";
-        trackList += i;
-        trackList +=
-                    "'>"
-                    "<button type='submit' class='close'><span>&times;</span></button>"
-                "</form>"
-                "<form method='GET' action='/play' style='display:inline'>"
-                    "<input type='hidden' name='id' value='";
-        trackList += i;
-        trackList +=
-                    "'>"
-                    "<button type='submit' class='close'><i class='material-icons'>play_arrow</i></span></button>"
-                "</form>";
-        trackList +=
-            "</td>"
-        "</tr>";
-    }
-
-    body +=
+    const char* body =
     "<!doctype html> "
     "<html>"
         "<head>"
             "<title>RadioBox</title>"
             "<link rel='stylesheet' href='https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css'>"
             "<link rel='stylesheet' href='https://fonts.googleapis.com/icon?family=Material+Icons'>"
+            "<style>"
+                ".current {font-weight: bold;}"
+                "body {margin-bottom: 1em;}"
+            "</style>"
+            "<script type='text/javascript'>"
+                "window.onload = function () {"
+                    "var xhr = new XMLHttpRequest();"
+                    "xhr.open('GET', '/list', false);"
+                    "xhr.send();"
+                    "if (xhr.status != 200) {"
+                        "return;"
+                    "}"
+                    "var response = JSON.parse(xhr.responseText);"
+                    "var list = response.list;"
+                    "var current = response.current;"
+                    "var htmlList = '';"
+                    "for (var id in list) {"
+                        "var track = list[id];"
+                        "htmlList += '<tr data-id=\"' + track.id + '\"'"
+                            "+ (current == track.id ? 'class=\"current\">' : '>')"
+                            "+ '<td>' + (track.id + 1) + '</td>'"
+                            "+ '<td>' + track.url + '</td>'"
+                            "+ '<td><span class=\"material-icons close play\">'"
+                                "+ (current == track.id ? 'pause' : 'play_arrow')"
+                            "+ '</span></td>'"
+                            "+ '<td><span class=\"close delete\">&times;</span></td>'"
+                        "+ '</tr>';"
+                    "}"
+                    "document.getElementById('list').innerHTML = htmlList;"
+                    "document.querySelectorAll('#list .play').forEach(function (element) {"
+                        "element.addEventListener('click', play);"
+                    "});"
+                    "document.querySelectorAll('#list .delete').forEach(function (element) {"
+                        "element.addEventListener('click', deleteTrack);"
+                    "});"
+                "};"
+                "function play(event) {"
+                    "var row = event.target.parentElement.parentElement;"
+                    "var id = row.getAttribute('data-id');"
+                    "window.location.replace('/play?id=' + id);"
+                "}"
+                "function deleteTrack(event) {"
+                    "var row = event.target.parentElement.parentElement;"
+                    "var id = row.getAttribute('data-id');"
+                    "window.location.replace('/del?id=' + id);"
+                "}"
+            "</script>"
         "</head>"
         "<body>"
             "<div class='container'>"
                 "<table class='table table-hover table-striped'>"
-                    "<tr>"
-                        "<td class='info'>#</td>"
-                        "<td class='info'>Station url</td>"
-                    "</tr>";
-    body += trackList;
-    body +=
+                    "<thead>"
+                        "<tr class='btn-secondary'>"
+                            "<th>#</th>"
+                            "<th>Station url</th>"
+                            "<th></th>"
+                            "<th></th>"
+                        "</tr>"
+                    "</thead>"
+                    "<tbody id='list'>"
+                    "</tbody>"
                 "</table>"
-                "<form class='form-inline' method='GET' action='/add'>"
-                    "<div class='form-group'>"
-                        "<input type='url' class='form-control' name='url' required placeholder='http://radio.url/mp3'>"
+                "<form class='form-inline row' method='GET' action='/add'>"
+                    "<div class='form-group col-sm-6'>"
+                        "<input type='url' class='form-control col-sm-12' name='url' required placeholder='http://radio.url/station.mp3'>"
                     "</div>"
-                    "<input type='submit' class='btn btn-primary' style='margin-left: 10px' value='Add Station'>"
+                    "<div class='form-group col-sm-3 col-lg-2'>"
+                        "<input type='submit' class='btn btn-secondary col-sm-12' value='Add Station'>"
+                    "</div>"
                 "</form>"
             "</div>"
         "</body>"
     "</html>";
 
-    server->send(200, "text/html", body);
+    player->stop();
+
+    server->send(200, "text/html; charset=utf-8", body);
+    server->client().stop();
+    player->play();
+}
+
+void HomeController::list(void)
+{
+    String json;
+    String trackList;
+    PlayList *playlist = player->getPlaylist();
+
+    player->stop();
+
+    for (uint8_t i = 0; i < playlist->getTracksCount(); i++) {
+        trackList +=
+            "{"
+                "\"id\":";
+        trackList += i;
+        trackList += ","
+                "\"url\":\"";
+        // TODO: Escape string
+        trackList += playlist->getTrack(i).c_str();
+        trackList += "\""
+            "}";
+
+        if (i + 1 < playlist->getTracksCount()) {
+            trackList += ",";
+        }
+    }
+
+    json =
+        "{"
+            "\"list\": [";
+    json += trackList;
+    json +=
+            "],";
+    json +=
+            "\"current\": ";
+    json += playlist->getCurrentTrackPos();
+    json +=
+        "}";
+
+    server->send(200, "application/json", json);
+    player->play();
 }
 
 void HomeController::addStation(void)
@@ -79,6 +143,7 @@ void HomeController::addStation(void)
     String url = server->arg("url");
     PlayList *playlist = player->getPlaylist();
 
+    player->stop();
     playlist->addTrack(url.c_str());
 
     server->sendHeader("Location", "/", true);
@@ -90,6 +155,7 @@ void HomeController::delStation(void)
     String stationId = server->arg("id");
     PlayList *playlist = player->getPlaylist();
 
+    player->stop();
     playlist->removeTrack(stationId.toInt());
 
     server->sendHeader("Location", "/", true);
@@ -100,8 +166,10 @@ void HomeController::playStation(void)
 {
     String stationId = server->arg("id");
 
-    player->play(stationId.toInt());
+    player->stop();
 
     server->sendHeader("Location", "/", true);
     server->send(302, "text/plain", "");
+
+    player->play(stationId.toInt());
 }

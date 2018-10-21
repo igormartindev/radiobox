@@ -57,6 +57,10 @@ void PlayList::removeTrack(uint8_t trackNo)
     TrackList::iterator it = std::next(tracklist->begin(), trackNo);
     tracklist->erase(it);
     save();
+
+    if (trackNo <= currentTrack && currentTrack > 0) {
+        currentTrack--;
+    }
 }
 
 uint8_t PlayList::getTracksCount(void)

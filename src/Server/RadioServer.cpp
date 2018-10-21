@@ -19,6 +19,7 @@ void RadioServer::router(void)
     controller = new HomeController(server, player);
 
     server->on("/", HTTP_GET, std::bind(&HomeController::index, controller));
+    server->on("/list", HTTP_GET, std::bind(&HomeController::list, controller));
     server->on("/add", HTTP_GET, std::bind(&HomeController::addStation, controller));
     server->on("/del", HTTP_GET, std::bind(&HomeController::delStation, controller));
     server->on("/play", HTTP_GET, std::bind(&HomeController::playStation, controller));

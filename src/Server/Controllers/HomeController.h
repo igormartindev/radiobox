@@ -10,6 +10,7 @@ class HomeController
 public:
     HomeController(ESP8266WebServer* server, AudioPlayer* player);
     void index(void);
+    void list(void);
     void addStation(void);
     void delStation(void);
     void playStation(void);
