@@ -1,5 +1,11 @@
-#include "main.h"
+#include <Arduino.h>
+#include "Services/NetworkManager.h"
+#include "Player/AudioPlayer.h"
+#include "Server/RadioServer.h"
 
+
+RadioServer* webServer;
+AudioPlayer* player;
 
 void setup()
 {
@@ -10,14 +16,15 @@ void setup()
         ->connect("RadioBox", "secret");
 
     PlayList* playlist = new PlayList(&SPIFFS, "/playlist");
+    player = new AudioPlayer(playlist);
+    webServer = new RadioServer(player);
 
-    AudioPlayer::instance()
-        ->init(playlist)
-        ->play();
+    webServer->start();
+    player->play();
 }
 
 void loop()
 {
-    AudioPlayer::instance()
-        ->handle();
+    webServer->handler();
+    player->handle();
 }

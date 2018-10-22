@@ -18,6 +18,8 @@ private:
     bool hasInternet = false;
 
     NetworkManager();
+    NetworkManager(NetworkManager const&);
+    NetworkManager& operator= (NetworkManager const&);
 };
 
 #endif // NETWORK_MANAGER_H

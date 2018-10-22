@@ -49,13 +49,18 @@ void PlayList::addTrack(std::string url)
 
 void PlayList::removeTrack(uint8_t trackNo)
 {
-    if (!tracklist->size()) {
+    if (tracklist->empty()) {
+        Serial.println("Playlist is empty");
         return;
     }
 
     TrackList::iterator it = std::next(tracklist->begin(), trackNo);
     tracklist->erase(it);
     save();
+
+    if (trackNo <= currentTrack && currentTrack > 0) {
+        currentTrack--;
+    }
 }
 
 uint8_t PlayList::getTracksCount(void)
@@ -63,9 +68,24 @@ uint8_t PlayList::getTracksCount(void)
     return tracklist->size();
 }
 
+uint8_t PlayList::getCurrentTrackPos()
+{
+    return currentTrack;
+}
+
+bool PlayList::setCurrentTrackPos(uint8_t trackNo)
+{
+    if (trackNo >= tracklist->size()) {
+        return false;
+    }
+
+    currentTrack = trackNo;
+    return true;
+}
+
 bool PlayList::hasTracks(void)
 {
-    return (bool)tracklist->size();
+    return !tracklist->empty();
 }
 
 void PlayList::save(void)
